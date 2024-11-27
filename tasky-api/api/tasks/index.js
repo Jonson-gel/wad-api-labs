@@ -20,14 +20,16 @@ router.get('/:id', (req, res) => {
 
 //Add a task
 router.post('/', (req, res) => {
-    const { title, description, deadline, priority, done } = req.body;
+    const { title, description, deadline, priority, done, created_at, updated_at } = req.body;
     const newTask = {
         id: uuidv4(),
         title,
         description,
         deadline,
         priority,
-        done
+        done,
+        created_at: getDate(),
+        updated_at: getDate()
     };
     tasksData.tasks.push(newTask);
     res.status(201).json(newTask);
@@ -38,10 +40,11 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
     const { id } = req.params;
     const taskIndex = tasksData.tasks.findIndex(task => task.id === id); 
+    const updated_at = getDate();
     if (taskIndex === -1) {
         return res.status(404).json({ status: 404, message: 'Task not found' });
     }
-    const updatedTask = { ...tasksData.tasks[taskIndex], ...req.body, id:id };
+    const updatedTask = { ...tasksData.tasks[taskIndex], ...req.body, id:id, created_at:req.created_at, updated_at:updated_at };
     tasksData.tasks[taskIndex] = updatedTask;
     res.json(updatedTask);
 });
@@ -56,5 +59,9 @@ router.delete('/:id', (req, res) => {
     res.status(204).send();
     tasksData.total_results--;
 });
+
+const getDate = () =>{
+    return new Date().toISOString();
+};
 
 export default router;
